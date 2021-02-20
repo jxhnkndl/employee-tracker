@@ -6,20 +6,20 @@ CREATE DATABASE employees_db;
 USE employees_db;
 
 -- Create Department table
-CREATE TABLE department (
+CREATE TABLE departments (
   id INT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(30) NOT NULL,
+  name VARCHAR(30),
   PRIMARY KEY (id)
 );
 
 -- Create Roles table
 CREATE TABLE roles (
   id INT NOT NULL AUTO_INCREMENT,
-  title VARCHAR(30) NOT NULL,
-  salary DECIMAL(10,4) NOT NULL,
+  title VARCHAR(30),
+  salary DECIMAL(10,2),
   department_id INT NOT NULL,
   PRIMARY KEY (id),
-  FOREIGN KEY (department_id) REFERENCES department(id)
+  FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 -- Create Employees table
