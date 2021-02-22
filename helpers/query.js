@@ -22,9 +22,9 @@ module.exports = {
   viewRoles: `
     SELECT roles.id, roles.title, roles.salary, departments.name
     FROM roles
-    INNER JOIN departments
+    LEFT JOIN departments
     ON roles.department_id = departments.id
-    ORDER BY departments.name ASC, roles.title ASC
+    ORDER BY roles.id ASC
   `,
 
   // Query: View departments
@@ -39,7 +39,7 @@ module.exports = {
         ELSE null
     END AS 'Department Chief'
     FROM departments
-    ORDER BY departments.name ASC;
+    ORDER BY departments.id ASC
     `,
 
   // Query: Add employee
