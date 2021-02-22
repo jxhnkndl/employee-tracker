@@ -2,6 +2,7 @@
 const mysql = require('mysql');
 const table = require('console.table');
 const inquirer = require('inquirer');
+const query = require('./helpers/query');
 
 // Employee roles array
 const roles = [
@@ -31,6 +32,20 @@ const managers = [
   { value: null, name: 'No Manager' },
 ];
 
+// Configure MySQL
+const connection = mysql.createConnection({
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'password',
+  database: 'employees_db',
+});
+
+// Establish connection with database
+connection.connect((err) => {
+  console.log(`Connection at id ${connection.threadId}`);
+});
+
 // Init
 ask();
 
@@ -59,6 +74,7 @@ function ask() {
 
       switch (input) {
         case 'View All Employees':
+          viewData(query.viewEmployees);
           break;
         case 'Add New Employee':
           addEmployee();
@@ -66,10 +82,12 @@ function ask() {
         case 'Update Employee Role':
           break;
         case 'View All Roles':
+          viewData(query.viewRoles);
           break;
         case 'Add New Role':
           break;
         case 'View All Departments':
+          viewData(query.viewDepts);
           break;
         case 'Add New Department':
           break;
@@ -109,7 +127,18 @@ function addEmployee() {
     },
   ]).then(answers => {
 
-    console.log(answers);
+    
 
+  });
+}
+
+// View data
+function viewData(queryString) {
+  console.log('Requesting data from database... \n');
+  const results = connection.query(queryString, (err, res) => {
+    if (err) throw err;
+    console.log('Data downloaded. View below: \n');
+    console.table(res);
+    ask();
   });
 }
