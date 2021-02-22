@@ -92,6 +92,7 @@ function ask() {
         case 'Add New Department':
           break;
         case 'Exit':
+          exit();
           break;
         default:
           console.log('Something went wrong. Please ask again.');
@@ -100,36 +101,36 @@ function ask() {
     });
 }
 
-// Gather user input to add new employee to database
+// Add employee to database
 function addEmployee() {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'first_name',
-      message: "Employee's First Name:",
-    },
-    {
-      type: 'input',
-      name: 'last_name',
-      message: "Employee's Last Name:",
-    },
-    {
-      type: 'list',
-      name: 'role_id',
-      choices: roles,
-      message: "Employee's Role:",
-    },
-    {
-      type: 'list',
-      name: 'manager_id',
-      choices: managers,
-      message: "Employee's Manager:",
-    },
-  ]).then(answers => {
-
-    
-
-  });
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'first_name',
+        message: "Employee's First Name:",
+      },
+      {
+        type: 'input',
+        name: 'last_name',
+        message: "Employee's Last Name:",
+      },
+      {
+        type: 'list',
+        name: 'role_id',
+        choices: roles,
+        message: "Employee's Role:",
+      },
+      {
+        type: 'list',
+        name: 'manager_id',
+        choices: managers,
+        message: "Employee's Manager:",
+      },
+    ])
+    .then((answers) => {
+      addData(query.addEmployee, query.viewEmployees, answers, 'employee');
+    });
 }
 
 // View data
@@ -141,4 +142,20 @@ function viewData(queryString) {
     console.table(res);
     ask();
   });
+}
+
+// Add data to database
+function addData(queryString, reQueryString, data, keyword) {
+  console.log(`Adding new ${keyword} to database... \n`);
+  const query = connection.query(queryString, data, (err) => {
+    if (err) throw err;
+    console.log(`New ${keyword} successfully added to database. \n`);
+    viewData(reQueryString);
+  });
+}
+
+// Exit application
+function exit() {
+  console.log('Goodbye!');
+  connection.end();
 }

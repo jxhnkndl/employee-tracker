@@ -16,7 +16,6 @@ module.exports = {
     ON employees.role_id = roles.id
     INNER JOIN departments
     ON roles.department_id = departments.id
-    ORDER BY employees.first_name ASC;
   `,
 
   // Query: View roles
