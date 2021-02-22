@@ -2,17 +2,49 @@
 const mysql = require('mysql');
 const table = require('console.table');
 
-// Configure MySQL
-const connection = mysql.createConnection({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'password',
-  database: 'employees_db'
-});
+// Primary logic routing function
+function ask() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'input',
+        choices: [
+          'View All Employees',
+          'Add New Employee',
+          'Update Employee Role',
+          'View All Roles',
+          'Add New Role',
+          'View All Departments',
+          'Add New Department',
+          'Exit',
+        ],
+        message: 'What would you like to do?',
+      },
+    ])
+    .then((answer) => {
+      const { input } = answer;
 
-// Establish connection with database
-connection.connect((err) => {
-  console.log(`Connection at id ${connection.threadId}`);
-});
-
+      switch (input) {
+        case 'View All Employees':
+          break;
+        case 'Add New Employee':
+          break;
+        case 'Update Employee Role':
+          break;
+        case 'View All Roles':
+          break;
+        case 'Add New Role':
+          break;
+        case 'View All Departments':
+          break;
+        case 'Add New Department':
+          break;
+        case 'Exit':
+          break;
+        default:
+          console.log('Something went wrong. Please ask again.');
+          ask();
+      }
+    });
+}
