@@ -23,7 +23,7 @@ VALUES
   ('Accountant', 120000, 3),                -- 8
   ('Account Manager', 80000, 3),            -- 9
   ('Sales Team Lead', 100000, 4),           -- 10
-  ('Sales Associate', 75000, 4),                -- 11
+  ('Salesperson', 75000, 4),                -- 11
   ('Marketing Team Lead', 150000, 5),       -- 12
   ('Community Manager', 50000, 5),          -- 13
   ('Brand Ambassador', 30000, 5);           -- 14
