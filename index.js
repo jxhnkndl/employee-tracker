@@ -4,7 +4,7 @@ const table = require('console.table');
 const inquirer = require('inquirer');
 
 // Import object organizing SQL queries
-const query = require('./helpers/query');
+const query = require('./lib/query');
 
 // Local data arrays (for adding dynamically inserted data into inquirer prompts)
 const departments = [];
@@ -26,11 +26,19 @@ connection.connect((err) => {
 });
 
 // Init
-ask();
+init();
 
-refreshRoles(query.refreshRoles);
-refreshEmployees(query.refreshEmployees);
-refreshDepts(query.refreshDepts);
+// Group initailization functions
+function init() {
+
+  // Populate local list choice arrays
+  refreshRoles(query.refreshRoles);
+  refreshEmployees(query.refreshEmployees);
+  refreshDepts(query.refreshDepts);
+
+  // Start user prompts
+  ask();
+}
 
 // Primary logic routing function
 function ask() {
@@ -47,12 +55,19 @@ function ask() {
           'Add New Role',
           'View All Departments',
           'Add New Department',
+          'Delete Record',
           'Exit',
         ],
         message: 'What would you like to do?',
       },
     ])
     .then((answer) => {
+
+      // Refresh all local list choice arrays
+      refreshRoles(query.refreshRoles);
+      refreshEmployees(query.refreshEmployees);
+      refreshDepts(query.refreshDepts);
+
       const { input } = answer;
 
       switch (input) {
@@ -77,6 +92,9 @@ function ask() {
         case 'Add New Department':
           addDepartment();
           break;
+        case 'Delete Record':
+          deleteRecord();
+          break;
         case 'Exit':
           exit();
           break;
@@ -89,11 +107,6 @@ function ask() {
 
 // Add employee to database
 function addEmployee() {
-  // Update local roles and employees arrays used in the prompts below
-  refreshRoles(query.refreshRoles);
-  refreshEmployees(query.refreshEmployees);
-
-  // Collect new employee information from user
   inquirer
     .prompt([
       {
@@ -123,16 +136,12 @@ function addEmployee() {
       console.log(
         `Adding ${answers.first_name} ${answers.last_name} to database...\n`
       );
-      addRecords(query.addEmployee, query.viewEmployees, answers);
+      updateRecords(query.addEmployee, query.viewEmployees, answers);
     });
 }
 
 // Add role to database
 function addRole() {
-  // Update local roles and departments arrays used in the prompts below
-  refreshRoles(query.refreshRoles);
-  refreshDepts(query.refreshDepts);
-
   // Collect new role information from user
   inquirer
     .prompt([
@@ -156,16 +165,12 @@ function addRole() {
     .then((answers) => {
       console.log(`Adding new ${answers.title} role to database...\n`);
 
-      addRecords(query.addRole, query.viewRoles, answers);
+      updateRecords(query.addRole, query.viewRoles, answers);
     });
 }
 
 // Add department to database
 function addDepartment() {
-  // Update local departments and employees arrays used in the prompts below
-  refreshDepts(query.refreshDepts);
-  refreshEmployees(query.refreshEmployees);
-
   inquirer
     .prompt([
       {
@@ -177,35 +182,116 @@ function addDepartment() {
     .then((answers) => {
       console.log(`Adding ${answers.name} department to database...\n`);
 
-      addRecords(query.addDept, query.viewDepts, answers);
+      updateRecords(query.addDept, query.viewDepts, answers);
     });
 }
 
 // Update employee's role
 function updateRole() {
-  // Update local roles and departments arrays used in the prompts below
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'id',
+        choices: employees,
+        message: "Which employee's records do you want to update?",
+      },
+      {
+        type: 'list',
+        name: 'role_id',
+        choices: roles,
+        message: "What is the employee's new role?",
+      },
+    ])
+    .then((answers) => {
+      const { id, role_id } = answers;
+
+      console.log(`Updating employee records...\n`);
+
+      updateRecords(query.updateEmployee, query.viewEmployees, [role_id, id]);
+    });
+}
+
+// Delete a record
+function deleteRecord() {
   refreshRoles(query.refreshRoles);
   refreshEmployees(query.refreshEmployees);
+  refreshDepts(query.refreshDepts);
 
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'id',
-      choices: employees,
-      message: "Which employee's records do you want to update?"
-    },
-    {
-      type: 'list',
-      name: 'role_id',
-      choices: roles,
-      message: "What is the employee's new role?"
-    }
-  ]).then((answers) => {
-    const { id, role_id } = answers;
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'table',
+        choices: ['Employees', 'Roles', 'Departments'],
+        message: 'Which type of record would you like to delete?',
+      },
+      {
+        type: 'list',
+        name: 'id',
+        choices: employees,
+        when: (answers) => answers.table === 'Employees',
+        message: 'Which employee record would you like to delete?',
+      },
+      {
+        type: 'list',
+        name: 'id',
+        choices: roles,
+        when: (answers) => answers.table === 'Roles',
+        message: 'Which position record would you like to delete?',
+      },
+      {
+        type: 'list',
+        name: 'id',
+        choices: departments,
+        when: (answers) => answers.table === 'Departments',
+        message: 'Which department record would you like to delete?',
+      },
+      {
+        type: 'confirm',
+        name: 'confirm_delete',
+        message: 'Are you sure you want to delete?'
+      }
+    ])
+    .then((answers) => {
+      if (!answers.confirm_delete) {
+        ask();
+        return;
+      }
 
-    console.log(`Updating employee records...\n`);
+      if (answers.table === 'Employees') {
+        console.log('Deleting employee records...');
+        updateRecords(query.deleteEmployee, query.viewEmployees, answers.id);
 
-    updateRecords(query.updateEmployee, query.viewEmployees, [role_id, id]);
+      } else if (answers.table === 'Roles') {
+        console.log('Deleting position records...');
+        updateRecords(query.deleteRole, query.viewRoles, answers.id);
+
+      } else if (answers.table === 'Departments') {
+        console.log('Deleting department records...');
+        updateRecords(query.deleteDept, query.viewDepts, answers.id)
+
+      }
+    });
+}
+
+// Promisify getting data from database
+function getData(queryString) {
+  return new Promise((resolve, reject) => {
+    connection.query(queryString, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
+  });
+}
+
+// Promisify adding data to database
+async function alterData(queryString, data) {
+  return new Promise((resolve, reject) => {
+    connection.query(queryString, data, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
   });
 }
 
@@ -214,28 +300,18 @@ async function viewRecords(queryString) {
   console.log('Requesting data from database... \n');
 
   const results = await getData(queryString);
-  console.log('Data retrieved. View Below: \n');
+  console.log('Data retrieved.\n');
   console.table(results);
 
   ask();
 }
 
 // Add data to database
-async function addRecords(queryString, reQueryString, data) {
-  const results = await addData(queryString, data);
+async function updateRecords(queryString, reQueryString, data) {
+  const results = await alterData(queryString, data);
 
   console.log(`Operation complete - ${results.affectedRows} rows affected.\n`);
-  console.log(`New record created with id ${results.insertId}.\n`);
 
-  viewRecords(reQueryString);
-}
-
-// Update data database
-async function updateRecords(queryString, reQueryString, data) {
-  const results = await addData(queryString, data);
-
-  console.log(`Data updated - ${results.affectedRows} rows affected.\n`);
-  // console.log(`New record created with id ${results.insertId}.\n`);
   viewRecords(reQueryString);
 }
 
@@ -271,26 +347,6 @@ async function refreshDepts(queryString) {
   });
 
   departments.push({ id: null, name: 'No Department' });
-}
-
-// Promisify getting data from database
-function getData(queryString) {
-  return new Promise((resolve, reject) => {
-    connection.query(queryString, (err, res) => {
-      if (err) reject(err);
-      resolve(res);
-    });
-  });
-}
-
-// Promisify adding data to database
-async function addData(queryString, data) {
-  return new Promise((resolve, reject) => {
-    connection.query(queryString, data, (err, res) => {
-      if (err) reject(err);
-      resolve(res);
-    });
-  });
 }
 
 // Exit application
