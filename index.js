@@ -126,10 +126,31 @@ function addRole() {
 
   // Update local roles and managers array used in the prompts below
   refreshRoles(query.refreshRoles);
-  refreshManagers(query.refreshManagers);
+  refreshDepts(query.refreshDepts);
 
-  inquirer.prompt();
+  // Collect new role information from user
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'title',
+      message: "Role's Title:"
+    },
+    {
+      type: 'input',
+      name: 'salary',
+      message: "Role's Salary:"
+    },
+    {
+      type: 'list',
+      name: 'department_id',
+      choices: departments,
+      message: "Add to Department:"
+    }
+  ]).then((answers) => {
+    console.log(`Adding new ${answers.title} role to database...\n`);
 
+    addRecords(query.addRole, query.viewRoles, answers);
+  });
 }
 
 // View data from database
@@ -145,25 +166,16 @@ async function viewRecords(queryString) {
 
 // Add data to database
 async function addRecords(queryString, reQueryString, data) {
-  const results = await addData(query.addEmployee, data);
+  const results = await addData(queryString, data);
 
-  console.log(`Operation complete - ${results.affectedRows} rows affected.`);
-  console.log(`New record successfully created with id ${results.insertId}.\n`);
+  console.log(`Operation complete - ${results.affectedRows} rows affected.\n`);
+  console.log(`New record created with id ${results.insertId}.\n`);
 
   viewRecords(reQueryString);
 }
 
-// Update local roles array used as choices array in inquirer prompts
-async function refreshRoles(queryString) {
-  const results = await getData(queryString);
 
-  results.forEach((row) => {
-    const { id, title } = row;
-    roles.push({ value: id, name: title });
-  });
-}
-
-// Get employees to push into Inquirer prompt choices array
+// Refresh employees array to use as list options in Inquirer prompt
 async function refreshEmployees(queryString) {
   const results = await getData(queryString);
 
@@ -174,6 +186,31 @@ async function refreshEmployees(queryString) {
 
   employees.push({ value: null, name: 'No Manager' });
 }
+
+
+// Refresh roles array to use as list options in Inquirer prompt
+async function refreshRoles(queryString) {
+  const results = await getData(queryString);
+
+  results.forEach((row) => {
+    const { id, title } = row;
+    roles.push({ value: id, name: title });
+  });
+}
+
+// Refresh departments array to use as list options in Inquirer prompt
+async function refreshDepts(queryString) {
+  const results = await getData(queryString);
+
+  results.forEach((row) => {
+    const { id, name } = row;
+    departments.push({ value: id, name: name });
+  });
+
+  departments.push({ id: null, name: 'No Department' });
+}
+
+
 
 // Promisify getting data from database
 function getData(queryString) {
