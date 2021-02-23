@@ -64,7 +64,8 @@ function ask() {
         choices: [
           'View All Employees',
           'Add New Employee',
-          'Update Employee Role',
+          "Update Employee's Role",
+          "Update Employee's Manager",
           'View All Roles',
           'Add New Role',
           'View All Departments',
@@ -91,8 +92,11 @@ function ask() {
         case 'Add New Employee':
           addEmployee();
           break;
-        case 'Update Employee Role':
+        case "Update Employee's Role":
           updateRole();
+          break;
+        case "Update Employee's Manager":
+          updateManager();
           break;
         case 'View All Roles':
           viewRecords(query.viewRoles);
@@ -221,6 +225,32 @@ function updateRole() {
       console.log(`Updating employee records...\n`);
 
       updateRecords(query.updateEmployee, query.viewEmployees, [role_id, id]);
+    });
+}
+
+// Update employee's manager
+function updateManager() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'id',
+        choices: employees,
+        message: "Which employee's manager has changed?",
+      },
+      {
+        type: 'list',
+        name: 'manager_id',
+        choices: employees,
+        message: "Choose the employee's new manager:",
+      },
+    ])
+    .then((answers) => {
+      const { id, manager_id } = answers;
+
+      console.log(`Updating employee records...\n`);
+
+      updateRecords(query.updateManager, query.viewEmployees, [manager_id, id]);
     });
 }
 
