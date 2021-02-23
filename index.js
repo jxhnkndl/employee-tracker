@@ -1,3 +1,7 @@
+// // // // // // // //
+// APPLICATION SETUP //
+// // // // // // // // 
+
 // Import modules
 const mysql = require('mysql');
 const table = require('console.table');
@@ -25,6 +29,10 @@ connection.connect((err) => {
   console.log(`Connection at id ${connection.threadId}`);
 });
 
+// // // // // // //
+// INITIALIZATION //
+// // // // // // //
+
 // Init
 init();
 
@@ -39,6 +47,12 @@ function init() {
   // Start user prompts
   ask();
 }
+
+// // // // // // // // // // //
+//  MODULAR INQUIRER PROMPTS  //
+//  &&                        //
+//  PRIMARY APPLICATION LOGIC //
+// // // // // // // // // // //
 
 // Primary logic routing function
 function ask() {
@@ -133,9 +147,7 @@ function addEmployee() {
       },
     ])
     .then((answers) => {
-      console.log(
-        `Adding ${answers.first_name} ${answers.last_name} to database...\n`
-      );
+      console.log(`Adding ${answers.first_name} ${answers.last_name} to database...\n`);
       updateRecords(query.addEmployee, query.viewEmployees, answers);
     });
 }
@@ -275,6 +287,10 @@ function deleteRecord() {
     });
 }
 
+// // // // // // // // // // // //
+//  PROMISIFIED QUERY FUNCTIONS  //
+// // // // // // // // // // // //
+
 // Promisify getting data from database
 function getData(queryString) {
   return new Promise((resolve, reject) => {
@@ -295,6 +311,11 @@ async function alterData(queryString, data) {
   });
 }
 
+// // // // // // // // // // // // // // //
+// ASYNC/AWAIT QUERY INITIATING FUNCTIONS //
+// // // // // // // // // // // // // // //
+
+
 // View data from database
 async function viewRecords(queryString) {
   console.log('Requesting data from database... \n');
@@ -306,7 +327,7 @@ async function viewRecords(queryString) {
   ask();
 }
 
-// Add data to database
+// Add, update, or delete data to/from database
 async function updateRecords(queryString, reQueryString, data) {
   const results = await alterData(queryString, data);
 
@@ -315,7 +336,12 @@ async function updateRecords(queryString, reQueryString, data) {
   viewRecords(reQueryString);
 }
 
-// Refresh employees array to use as list options in Inquirer prompt
+// // // // // // // // // // // // // //
+//  INQUIRER PROMPT LIST CHOICE ARRAY  //
+//  REFRESH FUNCTIONS                  //
+// // // // // // // // // // // // // //
+
+// Refresh employees array to use as list choices in Inquirer prompt
 async function refreshEmployees(queryString) {
   const results = await getData(queryString);
 
@@ -327,7 +353,7 @@ async function refreshEmployees(queryString) {
   employees.push({ value: null, name: 'No Manager' });
 }
 
-// Refresh roles array to use as list options in Inquirer prompt
+// Refresh roles array to use as list choices in Inquirer prompt
 async function refreshRoles(queryString) {
   const results = await getData(queryString);
 
@@ -337,7 +363,7 @@ async function refreshRoles(queryString) {
   });
 }
 
-// Refresh departments array to use as list options in Inquirer prompt
+// Refresh departments array to use as list choices in Inquirer prompt
 async function refreshDepts(queryString) {
   const results = await getData(queryString);
 
@@ -346,8 +372,12 @@ async function refreshDepts(queryString) {
     departments.push({ value: id, name: name });
   });
 
-  departments.push({ id: null, name: 'No Department' });
+  departments.push({ value: null, name: 'No Department' });
 }
+
+// // // // // // // //
+// APPLICATION EXIT  //
+// // // // // // // // 
 
 // Exit application
 function exit() {
