@@ -9,7 +9,6 @@ const query = require('./helpers/query');
 // Local data arrays (for adding dynamically inserted data into inquirer prompts)
 const departments = [];
 const employees = [];
-const managers = [];
 const roles = [];
 
 // Configure MySQL
@@ -54,7 +53,7 @@ function ask() {
 
       switch (input) {
         case 'View All Employees':
-          viewData(query.viewEmployees);
+          viewRecords(query.viewEmployees);
           break;
         case 'Add New Employee':
           addEmployee();
@@ -62,13 +61,13 @@ function ask() {
         case 'Update Employee Role':
           break;
         case 'View All Roles':
-          viewData(query.viewRoles);
+          viewRecords(query.viewRoles);
           break;
         case 'Add New Role':
           addRole();
           break;
         case 'View All Departments':
-          viewData(query.viewDepts);
+          viewRecords(query.viewDepts);
           break;
         case 'Add New Department':
           addDepartment();
@@ -85,10 +84,9 @@ function ask() {
 
 // Add employee to database
 function addEmployee() {
-
   // Update local roles and managers array used in the prompts below
-  updateRoleData(query.updateRoleData);
-  updateManagerData(query.updateManagerData);
+  refreshRoles(query.refreshRoles);
+  refreshEmployees(query.refreshEmployees);
 
   // Collect new employee information from user
   inquirer
@@ -112,19 +110,30 @@ function addEmployee() {
       {
         type: 'list',
         name: 'manager_id',
-        choices: managers,
+        choices: employees,
         message: "Employee's Manager:",
       },
     ])
     .then((answers) => {
-
-      console.log(answers);
-
+      console.log(`Adding ${answers.first_name} ${answers.last_name} to database...\n`);
+      
+      addRecords(query.addEmployee, query.viewEmployees, answers);
     });
 }
 
-// Query function: View data from database
-async function viewData(queryString) {
+// Add role to database
+function addRole() {
+
+  // Update local roles and managers array used in the prompts below
+  refreshRoles(query.refreshRoles);
+  refreshManagers(query.refreshManagers);
+
+  inquirer.prompt();
+
+}
+
+// View data from database
+async function viewRecords(queryString) {
   console.log('Requesting data from database... \n');
 
   const results = await getData(queryString);
@@ -134,8 +143,18 @@ async function viewData(queryString) {
   ask();
 }
 
+// Add data to database
+async function addRecords(queryString, reQueryString, data) {
+  const results = await addData(query.addEmployee, data);
+
+  console.log(`Operation complete - ${results.affectedRows} rows affected.`);
+  console.log(`New record successfully created with id ${results.insertId}.\n`);
+
+  viewRecords(reQueryString);
+}
+
 // Update local roles array used as choices array in inquirer prompts
-async function updateRoleData(queryString) {
+async function refreshRoles(queryString) {
   const results = await getData(queryString);
 
   results.forEach((row) => {
@@ -144,21 +163,32 @@ async function updateRoleData(queryString) {
   });
 }
 
-// Update local managers array used as choices array in inquirer prompts
-async function updateManagerData(queryString) {
+// Get employees to push into Inquirer prompt choices array
+async function refreshEmployees(queryString) {
   const results = await getData(queryString);
 
   results.forEach((row) => {
     const { id, first_name, last_name } = row;
-    managers.push({ value: id, name: `${first_name} ${last_name}` });
+    employees.push({ value: id, name: `${first_name} ${last_name}` });
+  });
+
+  employees.push({ value: null, name: 'No Manager' });
+}
+
+// Promisify getting data from database
+function getData(queryString) {
+  return new Promise((resolve, reject) => {
+    connection.query(queryString, (err, res) => {
+      if (err) reject(err);
+      resolve(res);
+    });
   });
 }
 
-// Helper: Promisify the retrieval of data from the database
-function getData(queryString) {
+// Promisify adding data to database
+async function addData(queryString, data) {
   return new Promise((resolve, reject) => {
-    connection.query(queryString, 
-    (err, res) => {
+    connection.query(queryString, data, (err, res) => {
       if (err) reject(err);
       resolve(res);
     });
