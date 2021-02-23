@@ -28,6 +28,10 @@ connection.connect((err) => {
 // Init
 ask();
 
+refreshRoles(query.refreshRoles);
+refreshEmployees(query.refreshEmployees);
+refreshDepts(query.refreshDepts);
+
 // Primary logic routing function
 function ask() {
   inquirer
@@ -59,6 +63,7 @@ function ask() {
           addEmployee();
           break;
         case 'Update Employee Role':
+          updateRole();
           break;
         case 'View All Roles':
           viewRecords(query.viewRoles);
@@ -84,7 +89,7 @@ function ask() {
 
 // Add employee to database
 function addEmployee() {
-  // Update local roles and managers array used in the prompts below
+  // Update local roles and employees arrays used in the prompts below
   refreshRoles(query.refreshRoles);
   refreshEmployees(query.refreshEmployees);
 
@@ -115,41 +120,92 @@ function addEmployee() {
       },
     ])
     .then((answers) => {
-      console.log(`Adding ${answers.first_name} ${answers.last_name} to database...\n`);
-      
+      console.log(
+        `Adding ${answers.first_name} ${answers.last_name} to database...\n`
+      );
       addRecords(query.addEmployee, query.viewEmployees, answers);
     });
 }
 
 // Add role to database
 function addRole() {
-
-  // Update local roles and managers array used in the prompts below
+  // Update local roles and departments arrays used in the prompts below
   refreshRoles(query.refreshRoles);
   refreshDepts(query.refreshDepts);
 
   // Collect new role information from user
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: "Role's Title:",
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: "Role's Salary:",
+      },
+      {
+        type: 'list',
+        name: 'department_id',
+        choices: departments,
+        message: 'Add to Department:',
+      },
+    ])
+    .then((answers) => {
+      console.log(`Adding new ${answers.title} role to database...\n`);
+
+      addRecords(query.addRole, query.viewRoles, answers);
+    });
+}
+
+// Add department to database
+function addDepartment() {
+  // Update local departments and employees arrays used in the prompts below
+  refreshDepts(query.refreshDepts);
+  refreshEmployees(query.refreshEmployees);
+
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: "Department's Name:",
+      },
+    ])
+    .then((answers) => {
+      console.log(`Adding ${answers.name} department to database...\n`);
+
+      addRecords(query.addDept, query.viewDepts, answers);
+    });
+}
+
+// Update employee's role
+function updateRole() {
+  // Update local roles and departments arrays used in the prompts below
+  refreshRoles(query.refreshRoles);
+  refreshEmployees(query.refreshEmployees);
+
   inquirer.prompt([
     {
-      type: 'input',
-      name: 'title',
-      message: "Role's Title:"
-    },
-    {
-      type: 'input',
-      name: 'salary',
-      message: "Role's Salary:"
+      type: 'list',
+      name: 'id',
+      choices: employees,
+      message: "Which employee's records do you want to update?"
     },
     {
       type: 'list',
-      name: 'department_id',
-      choices: departments,
-      message: "Add to Department:"
+      name: 'role_id',
+      choices: roles,
+      message: "What is the employee's new role?"
     }
   ]).then((answers) => {
-    console.log(`Adding new ${answers.title} role to database...\n`);
+    const { id, role_id } = answers;
 
-    addRecords(query.addRole, query.viewRoles, answers);
+    console.log(`Updating employee records...\n`);
+
+    updateRecords(query.updateEmployee, query.viewEmployees, [role_id, id]);
   });
 }
 
@@ -174,6 +230,14 @@ async function addRecords(queryString, reQueryString, data) {
   viewRecords(reQueryString);
 }
 
+// Update data database
+async function updateRecords(queryString, reQueryString, data) {
+  const results = await addData(queryString, data);
+
+  console.log(`Data updated - ${results.affectedRows} rows affected.\n`);
+  // console.log(`New record created with id ${results.insertId}.\n`);
+  viewRecords(reQueryString);
+}
 
 // Refresh employees array to use as list options in Inquirer prompt
 async function refreshEmployees(queryString) {
@@ -186,7 +250,6 @@ async function refreshEmployees(queryString) {
 
   employees.push({ value: null, name: 'No Manager' });
 }
-
 
 // Refresh roles array to use as list options in Inquirer prompt
 async function refreshRoles(queryString) {
@@ -209,8 +272,6 @@ async function refreshDepts(queryString) {
 
   departments.push({ id: null, name: 'No Department' });
 }
-
-
 
 // Promisify getting data from database
 function getData(queryString) {

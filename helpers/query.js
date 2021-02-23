@@ -36,7 +36,7 @@ module.exports = {
         WHEN departments.id = 3 THEN 'Topher Talley'
         WHEN departments.id = 4 THEN 'Jimmy Royston'
         WHEN departments.id = 5 THEN 'Nicole Smith'
-        ELSE null
+        ELSE 'TBA'
     END AS 'Department Chief'
     FROM departments
     ORDER BY departments.id ASC
@@ -52,7 +52,7 @@ module.exports = {
   addDept: `INSERT INTO departments SET ?`,
 
   // Query: Update employee role or manager
-  updateEmployee: `UPDATE employees SET ? WHERE ?`,
+  updateEmployee: `UPDATE employees SET role_id = (?) WHERE id = (?)`,
 
   // Query: Delete employee
   deleteEmployee: `DELETE FROM employees WHERE ?`,
