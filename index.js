@@ -6,9 +6,6 @@ const inquirer = require('inquirer');
 // Import object organizing SQL queries
 const query = require('./helpers/query');
 
-// Import object organizing Inquirer prompt arrays
-const questions = require('./helpers/questions');
-
 // Configure MySQL
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -24,11 +21,28 @@ connection.connect((err) => {
 });
 
 // Init
+updateEmployees();
 ask();
 
 // Primary logic routing function
 function ask() {
-  inquirer.prompt(questions.ask).then((answer) => {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'input',
+      choices: [
+        'View All Employees',
+        'Add New Employee',
+        'Update Employee Role',
+        'View All Roles',
+        'Add New Role',
+        'View All Departments',
+        'Add New Department',
+        'Exit',
+      ],
+      message: 'What would you like to do?',
+    },
+  ]).then((answer) => {
     const { input } = answer;
 
     switch (input) {
@@ -64,31 +78,35 @@ function ask() {
 
 // Add employee to database
 function addEmployee() {
-  inquirer.prompt(questions.addEmployee).then((answers) => {
-    addData(query.addEmployee, query.viewEmployees, answers, 'employee');
+
+  inquirer.prompt([
+    {
+      type: 'input',
+      name: 'first_name',
+      message: "Employee's First Name:",
+    },
+    {
+      type: 'input',
+      name: 'last_name',
+      message: "Employee's Last Name:",
+    },
+    {
+      type: 'list',
+      name: 'role_id',
+      choices: roles,
+      message: "Employee's Role:",
+    },
+    {
+      type: 'list',
+      name: 'manager_id',
+      choices: managers,
+      message: "Employee's Manager:",
+    },
+  ]).then((answers) => {
+
+
   });
 }
-
-// Add role to database
-function addRole() {
-  inquirer.prompt(questions.addRole).then((answers) => {
-
-    addData(query.addRole, query.viewRoles, answers, 'role');
-  });
-}
-
-// Add department to database
-function addDepartment() {
-  inquirer.prompt(questions.addDept).then((answers) => {
-    addData(query.addDept, query.viewDepts, answers, 'department');
-  });
-}
-
-// Update employee record
-function updateEmployee() {
-  
-}
-
 
 
 
@@ -107,20 +125,25 @@ function viewData(queryString) {
   });
 }
 
-// Query function: Add data to database
-function addData(queryString, reQueryString, data, keyword) {
-  console.log(`Adding new ${keyword} to database... \n`);
-
-  const query = connection.query(queryString, data, (err) => {
-    if (err) throw err;
-
-    console.log(`New ${keyword} successfully added to database. \n`);
-
-    viewData(reQueryString);
+// Update local roles array used as choices array in inquirer prompts
+async function updateRoleData(queryString) {
+  const results = await updateAppData(queryString);
+  
+  results.forEach(row => {
+    const { id, title } = row;
+    roles.push({ value: id, name: title });
   });
 }
 
+// Update local managers array used as choices array in inquirer prompts
+async function updateManagerData(queryString) {
+  const results = await updateAppData(queryString);
 
+  results.forEach(row => {
+    const { id, first_name, last_name } = row;
+    managers.push({ value: id, name: `${first_name} ${last_name}`});
+  });
+}
 
 // Exit application
 function exit() {
