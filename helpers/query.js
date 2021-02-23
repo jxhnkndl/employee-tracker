@@ -64,11 +64,11 @@ module.exports = {
   deleteDept: `DELETE FROM departments WHERE ?`,
 
   // Query: Update roles array used in inquirer prompts
-  updateRoleData: `SELECT id, title FROM roles`,
+  refreshRoles: `SELECT id, title FROM roles`,
 
   // Query: Update managers array used in inquirer prompts
-  updateManagerData: `SELECT id, first_name, last_name FROM employees WHERE manager_id IS NULL`,
+  refreshEmployees: `SELECT id, first_name, last_name FROM employees`,
 
   // Query: Update departments array used in inquirer prompts
-  updateDeptData: `SELECT id, name FROM departments`
+  refreshDepts: `SELECT id, name FROM departments`
 };
