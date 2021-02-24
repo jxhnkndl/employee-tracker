@@ -182,6 +182,12 @@ function viewByManager() {
       console.clear();
       console.log(`Accessing direct report records...`);
 
+      if (!answers.manager_id) {
+        console.log(`Invalid selection. Please try again.`);
+        ask();
+        return;
+      }
+
       viewSpecificRecords(query.viewByManager, answers.manager_id);
     });
 }
