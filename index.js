@@ -1,6 +1,6 @@
 // // // // // // // //
 // APPLICATION SETUP //
-// // // // // // // // 
+// // // // // // // //
 
 // Import modules
 const mysql = require('mysql');
@@ -34,7 +34,6 @@ init();
 
 // Group initailization functions
 function init() {
-
   // Establish connection with database
   connection.connect((err) => {
     console.log(`Connection at id ${connection.threadId}`);
@@ -62,6 +61,7 @@ function ask() {
         name: 'input',
         choices: [
           'View All Employees',
+          'View Employees by Manager',
           'Add New Employee',
           "Update Employee's Role",
           "Update Employee's Manager",
@@ -78,13 +78,15 @@ function ask() {
       },
     ])
     .then((answer) => {
-
       const { input } = answer;
 
       switch (input) {
         case 'View All Employees':
           console.clear();
           viewRecords(query.viewEmployees);
+          break;
+        case 'View Employees by Manager':
+          viewByManager();
           break;
         case 'Add New Employee':
           addEmployee();
@@ -157,9 +159,30 @@ function addEmployee() {
     ])
     .then((answers) => {
       console.clear();
-      console.log(`Adding ${answers.first_name} ${answers.last_name} to database...\n`);
+      console.log(
+        `Adding ${answers.first_name} ${answers.last_name} to database...\n`
+      );
 
       updateRecords(query.addEmployee, query.viewEmployees, answers);
+    });
+}
+
+// View employee by manager
+function viewByManager() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'manager_id',
+        choices: managers,
+        message: 'Select Manager:',
+      },
+    ])
+    .then((answers) => {
+      console.clear();
+      console.log(`Accessing direct report records...`);
+
+      viewSpecificRecords(query.viewByManager, answers.manager_id);
     });
 }
 
@@ -271,84 +294,90 @@ function updateManager() {
 
 // Delete employee
 function deleteEmployee() {
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'id',
-      choices: employees,
-      message: 'Which employee record would you like to delete?',
-    },
-    {
-      type: 'confirm',
-      name: 'confirm_delete',
-      message: 'Are you sure you want to delete?'
-    }
-  ]).then((answers) => {
-    if (!answers.confirm_delete) {
-      ask();
-      return;
-    }
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'id',
+        choices: employees,
+        message: 'Which employee record would you like to delete?',
+      },
+      {
+        type: 'confirm',
+        name: 'confirm_delete',
+        message: 'Are you sure you want to delete?',
+      },
+    ])
+    .then((answers) => {
+      if (!answers.confirm_delete) {
+        ask();
+        return;
+      }
 
-    console.clear();
-    console.log('Deleting employee records...');
+      console.clear();
+      console.log('Deleting employee records...');
 
-    updateRecords(query.deleteEmployee, query.viewEmployees, answers.id);
-  });
+      updateRecords(query.deleteEmployee, query.viewEmployees, answers.id);
+    });
 }
 
 // Delete role
 function deleteRole() {
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'id',
-      choices: roles,
-      message: 'Which position would you like to delete?',
-    },
-    {
-      type: 'confirm',
-      name: 'confirm_delete',
-      message: 'Are you sure you want to delete?'
-    }
-  ]).then((answers) => {
-    if (!answers.confirm_delete) {
-      ask();
-      return;
-    }
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'id',
+        choices: roles,
+        message: 'Which position would you like to delete?',
+      },
+      {
+        type: 'confirm',
+        name: 'confirm_delete',
+        message: 'Are you sure you want to delete?',
+      },
+    ])
+    .then((answers) => {
+      if (!answers.confirm_delete) {
+        ask();
+        return;
+      }
 
-    console.clear();
-    console.log('Deleting position records...');
+      console.clear();
+      console.log('Deleting position records...');
 
-    updateRecords(query.deleteRole, query.viewRoles, answers.id);
-  });
+      updateRecords(query.deleteRole, query.viewRoles, answers.id);
+    });
 }
 
 // Delete department
 function deleteDept() {
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'id',
-      choices: departments,
-      loop: false,
-      message: 'Which department would you like to delete?',
-    },
-    {
-      type: 'confirm',
-      name: 'confirm_delete',
-      message: 'Are you sure you want to delete?'
-    }
-  ]).then((answers) => {
-    if (!answers.confirm_delete) {
-      ask();
-      return;
-    }
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'id',
+        choices: departments,
+        loop: false,
+        message: 'Which department would you like to delete?',
+      },
+      {
+        type: 'confirm',
+        name: 'confirm_delete',
+        message: 'Are you sure you want to delete?',
+      },
+    ])
+    .then((answers) => {
+      if (!answers.confirm_delete) {
+        ask();
+        return;
+      }
 
-    console.clear();
-    console.log('Deleting department records...\n');
+      console.clear();
+      console.log('Deleting department records...\n');
 
-    updateRecords(query.deleteDept, query.viewDepts, answers.id);
-  });
+      updateRecords(query.deleteDept, query.viewDepts, answers.id);
+    });
 }
 
 // // // // // // // // // // // //
@@ -379,12 +408,22 @@ async function alterData(queryString, data) {
 // ASYNC/AWAIT QUERY INITIATING FUNCTIONS //
 // // // // // // // // // // // // // // //
 
-
 // View data from database
 async function viewRecords(queryString) {
   console.log('Requesting data from database... \n');
 
   const results = await getData(queryString);
+  console.log('Data retrieved.\n');
+  console.table(results);
+
+  ask();
+}
+
+// View data by parameter
+async function viewSpecificRecords(queryString, data) {
+  console.log('Requesting data from database... \n');
+
+  const results = await alterData(queryString, data);
   console.log('Data retrieved.\n');
   console.table(results);
 
@@ -458,7 +497,7 @@ function refresh() {
 
 // // // // // // // //
 // APPLICATION EXIT  //
-// // // // // // // // 
+// // // // // // // //
 
 // Exit application
 function exit() {
