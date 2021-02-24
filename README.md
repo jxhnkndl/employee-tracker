@@ -49,7 +49,7 @@ Once all third-party packages have been successfully installed and the database 
 
 This application uses a **MySQL** database. To use the program, you must have **SQL Server** installed and configured.
 
-The repository has a `db` folder containing the database schema and a seeds file containing fictional starter data. These files can be used to quickly get the application's database up and running using either SQL Workbench or using `mysql` directly through the command line.
+The application's `db` folder contains the database schema and a seeds file containing fictional initialization data. These files can be used to quickly get the application's database up and running using either SQL Workbench or the command line.
 
 Below is an outline of the database schema:
 
