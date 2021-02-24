@@ -31,18 +31,18 @@ VALUES
 -- Insert Employees
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES
-  ('J.K.', 'Royston', 1, null),       -- Chief Technology
-  ('Ford', 'Wesson', 12, null),       -- Marketing Lead
-  ('Topher', 'Talley', 5, null),      -- Legal Team Lead
-  ('Jimmy', 'Royston', 7, null),      -- Chief Financial
-  ('Nicole', 'Smith', 10, null),      -- Sales Team Lead
-  ('Dan', 'Mineart', 2, 1),           -- Senior Engineer
-  ('Chris', 'McPeters', 3, 1),        -- Junior Engineer
-  ('Weslie', 'Thomas', 3, 1),         -- Junior Engineer
-  ('Audrey', 'Wray', 13, 2),          -- Community Manager
-  ('Devon', 'Kraus', 14, 2),          -- Brand Ambassador
-  ('Riley', 'Hamilton', 11, 5),       -- Salesperson
-  ('Caitlin', 'Lane', 6, 3),          -- Associate Counsel
-  ('Ryan', 'Tinsley', 8, 4),          -- Accountant
-  ('Taylor', 'Hughes', 11, 5),        -- Salesperson
-  ('Josh', 'Reich', 4, 4);            -- Data Analyst
+  ('Elliot', 'Alderson', 1, null),          -- Chief Technology
+  ('Darlene', 'Alderson', 12, null),        -- Marketing Lead
+  ('Walter', 'Bishop', 5, null),            -- Legal Team Lead
+  ('Peter', 'Bishop', 7, null),             -- Chief Financial
+  ('Olivia', 'Dunham', 10, null),           -- Sales Team Lead
+  ('Spencer', 'Reid', 2, 1),                -- Senior Engineer
+  ('Eric', 'Taylor', 3, 1),                 -- Junior Engineer
+  ('Sara', 'Manning', 3, 1),                -- Junior Engineer
+  ('Winston', 'Bishop', 13, 2),             -- Community Manager
+  ('Nick', 'Miller', 14, 2),                -- Brand Ambassador
+  ('Jessica', 'Day', 11, 5),                -- Salesperson
+  ('John', 'Reese', 6, 3),                  -- Associate Counsel
+  ('Phillip', 'Price', 8, 4),               -- Accountant
+  ('Jed', 'Bartlett', 11, 5),               -- Salesperson
+  ('Leslie', 'Knope', 4, 4);                -- Data Analyst
