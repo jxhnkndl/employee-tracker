@@ -25,11 +25,6 @@ const connection = mysql.createConnection({
   database: 'employees_db',
 });
 
-// Establish connection with database
-connection.connect((err) => {
-  console.log(`Connection at id ${connection.threadId}`);
-});
-
 // // // // // // //
 // INITIALIZATION //
 // // // // // // //
@@ -39,6 +34,11 @@ init();
 
 // Group initailization functions
 function init() {
+
+  // Establish connection with database
+  connection.connect((err) => {
+    console.log(`Connection at id ${connection.threadId}`);
+  });
 
   // Populate local list choice arrays
   refresh();
@@ -421,7 +421,6 @@ async function refreshEmployees(queryString) {
       managers.push({ value: id, name: `${first_name} ${last_name}` });
     } else if (id === 7) {
       managers.push({ value: null, name: 'None' });
-      console.log(managers);
     }
   });
 }
