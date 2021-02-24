@@ -9,6 +9,7 @@
 * [Description](#description)
 * [Technologies](#technologies)
 * [Installation](#installation)
+* [Database Setup](#database-setup)
 * [Usage](#usage)
 * [Application Demo](#application-demo)
 * [License](#license)
@@ -16,13 +17,12 @@
 
 
 ## Description
-The Employee Tracking Interface is a command line application that offers business owners a
-user-friendly way of managing their employee, role, and department records. Using Node.js and Inquirer.js to power the application and a MySQL database to store and organize the company data, the interface is built around a series of command line prompts that guide users through the process of viewing records, creating records, deleting records, and updating an employee's role or manager.
+The Employee Tracking Interface is a command line application that offers business owners a user-friendly tool for managing their employee, role, and department records. Using Node.js and Inquirer.js to run the application and connect it to a MySQL database, the interface is built around a series of command line prompts that guide users through the process of viewing, adding, updating, and deleting company records.
 
 
 ## Technologies
 **Core Technologies:**  
-Node.js, JavaScript, Inquirer.js, MySQL
+Node.js, JavaScript, Inquirer.js, MySQL/SQL Server
 
 **Supplmentary Packages:**  
 console.table
@@ -36,15 +36,26 @@ node -v
 ```
 npm -v
 ```
-If Node and npm are already installed, the commands above should return version numbers. Visit [Node.js](http://www.nodejs.org/) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for full installation details and documentation.  
-
-The Employee Tracking Interface also requires the installation of three third-party modules including `inquirer`, `mysql`, and `console.table`.  
+If Node and npm are already installed, the commands above should return version numbers. Visit [Node.js](http://www.nodejs.org/) and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for full installation details and documentation. 
 
 To install the project and its npm dependencies, navigate to the project's root directory and run:
 ```
 npm install
 ```
-Once all third-party packages have been successfully installed, the application is ready to use. For more details, reference the application's `package.json` file.
+
+Once all third-party packages have been successfully installed and the database has been initialized (see below), the application is ready to use. For more details, reference the application's `package.json` file.
+
+## Database Setup
+
+This application uses a **MySQL** database. To use the program, you must have **SQL Server** installed and configured.
+
+The repository has a `db` folder containing the database schema and a seeds file containing fictional starter data. These files can be used to quickly get the application's database up and running using either SQL Workbench or using `mysql` directly through the command line.
+
+Below is an outline of the database schema:
+
+![schema](/assets/screenshots/schema.png)
+
+
 
 
 ## Usage
@@ -54,20 +65,14 @@ To launch the application from the command line, navigate to the project's root 
 node index.js
 ```
 
+The application's user journey is centered around the command line. Each menu selection walks the user through a specific interaction with the database. The user can easily and quickly view, add, update, and delete records from the database using nothing more than a keyboard.
 
-The application's user journey is centered around a menu of actions:
-
-![Preview-1](assets/screenshots/)
-
-Each action invokes a query that creates, reads, updates, or deletes data from the database. When the action creates, updates, or deletes data from the database, the application returns an updated view of the data's parent table. Additionally, changes to records are dynamically reflected in command line prompt choices. For example, creating a new employee will automatically add that employee to the lists of employees presented to users in other prompts:
-
-![Preview-2](assets/screenshots/)
-
+Additionally, changes made to records are dynamically reflected in command line prompt choices. For example, creating a new employee will automatically add that employee to employee lists presented to users in other prompts.
 
 ## Application Demo
 The following video documents the core functionality of the Employee Tracking Interface. Use this video to supplement the documentation above: 
 
-[![Application Preview](assets/demo-gifs/team-profile-generator-demo.gif)](https://drive.google.com/file/d/1nJ2gbuWn2ufELPXuDB2jVWeGVIfOp53m/view)
+[![Application Preview](assets/demo-gifs/demo.gif)](https://drive.google.com/file/d/1dDtcVJEUKm1cwaYMvIKMYudEg9AmdkNZ/view)
 
 
 ## License
