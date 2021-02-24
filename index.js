@@ -13,6 +13,7 @@ const query = require('./lib/query');
 // Local data arrays (for adding dynamically inserted data into inquirer prompts)
 const departments = [];
 const employees = [];
+const managers = [];
 const roles = [];
 
 // Configure MySQL
@@ -150,7 +151,7 @@ function addEmployee() {
       {
         type: 'list',
         name: 'manager_id',
-        choices: employees,
+        choices: managers,
         message: "Employee's Manager:",
       },
     ])
@@ -254,7 +255,7 @@ function updateManager() {
       {
         type: 'list',
         name: 'manager_id',
-        choices: employees,
+        choices: managers,
         message: "Choose the employee's new manager:",
       },
     ])
@@ -407,18 +408,28 @@ async function updateRecords(queryString, reQueryString, data) {
 
 // Refresh employees array to use as list choices in Inquirer prompt
 async function refreshEmployees(queryString) {
+  employees.length = 0;
+  managers.length = 0;
+
   const results = await getData(queryString);
 
   results.forEach((row) => {
     const { id, first_name, last_name } = row;
     employees.push({ value: id, name: `${first_name} ${last_name}` });
-  });
 
-  employees.push({ value: null, name: 'None' });
+    if (id < 6) {
+      managers.push({ value: id, name: `${first_name} ${last_name}` });
+    } else if (id === 7) {
+      managers.push({ value: null, name: 'None' });
+      console.log(managers);
+    }
+  });
 }
 
 // Refresh roles array to use as list choices in Inquirer prompt
 async function refreshRoles(queryString) {
+  roles.length = 0;
+
   const results = await getData(queryString);
 
   results.forEach((row) => {
@@ -429,6 +440,8 @@ async function refreshRoles(queryString) {
 
 // Refresh departments array to use as list choices in Inquirer prompt
 async function refreshDepts(queryString) {
+  departments.length = 0;
+
   const results = await getData(queryString);
 
   results.forEach((row) => {
