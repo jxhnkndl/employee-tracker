@@ -40,9 +40,7 @@ init();
 function init() {
 
   // Populate local list choice arrays
-  refreshRoles(query.refreshRoles);
-  refreshEmployees(query.refreshEmployees);
-  refreshDepts(query.refreshDepts);
+  refresh();
 
   // Start user prompts
   ask();
@@ -66,11 +64,13 @@ function ask() {
           'Add New Employee',
           "Update Employee's Role",
           "Update Employee's Manager",
+          'Delete Employee',
           'View All Roles',
           'Add New Role',
+          'Delete Role',
           'View All Departments',
           'Add New Department',
-          'Delete Record',
+          'Delete Department',
           'Exit',
         ],
         message: 'What would you like to do?',
@@ -78,15 +78,11 @@ function ask() {
     ])
     .then((answer) => {
 
-      // Refresh all local list choice arrays
-      refreshRoles(query.refreshRoles);
-      refreshEmployees(query.refreshEmployees);
-      refreshDepts(query.refreshDepts);
-
       const { input } = answer;
 
       switch (input) {
         case 'View All Employees':
+          console.clear();
           viewRecords(query.viewEmployees);
           break;
         case 'Add New Employee':
@@ -98,20 +94,28 @@ function ask() {
         case "Update Employee's Manager":
           updateManager();
           break;
+        case 'Delete Employee':
+          deleteEmployee();
+          break;
         case 'View All Roles':
+          console.clear();
           viewRecords(query.viewRoles);
           break;
         case 'Add New Role':
           addRole();
           break;
+        case 'Delete Role':
+          deleteRole();
+          break;
         case 'View All Departments':
+          console.clear();
           viewRecords(query.viewDepts);
           break;
         case 'Add New Department':
-          addDepartment();
+          addDept();
           break;
-        case 'Delete Record':
-          deleteRecord();
+        case 'Delete Department':
+          deleteDept();
           break;
         case 'Exit':
           exit();
@@ -151,14 +155,15 @@ function addEmployee() {
       },
     ])
     .then((answers) => {
+      console.clear();
       console.log(`Adding ${answers.first_name} ${answers.last_name} to database...\n`);
+
       updateRecords(query.addEmployee, query.viewEmployees, answers);
     });
 }
 
 // Add role to database
 function addRole() {
-  // Collect new role information from user
   inquirer
     .prompt([
       {
@@ -179,6 +184,7 @@ function addRole() {
       },
     ])
     .then((answers) => {
+      console.clear();
       console.log(`Adding new ${answers.title} role to database...\n`);
 
       updateRecords(query.addRole, query.viewRoles, answers);
@@ -186,7 +192,7 @@ function addRole() {
 }
 
 // Add department to database
-function addDepartment() {
+function addDept() {
   inquirer
     .prompt([
       {
@@ -196,6 +202,7 @@ function addDepartment() {
       },
     ])
     .then((answers) => {
+      console.clear();
       console.log(`Adding ${answers.name} department to database...\n`);
 
       updateRecords(query.addDept, query.viewDepts, answers);
@@ -220,8 +227,14 @@ function updateRole() {
       },
     ])
     .then((answers) => {
+      if (!answers.id) {
+        console.log(`Invalid selection. Please try again.\n`);
+        ask();
+      }
+
       const { id, role_id } = answers;
 
+      console.clear();
       console.log(`Updating employee records...\n`);
 
       updateRecords(query.updateEmployee, query.viewEmployees, [role_id, id]);
@@ -248,73 +261,93 @@ function updateManager() {
     .then((answers) => {
       const { id, manager_id } = answers;
 
+      console.clear();
       console.log(`Updating employee records...\n`);
 
       updateRecords(query.updateManager, query.viewEmployees, [manager_id, id]);
     });
 }
 
-// Delete a record
-function deleteRecord() {
-  refreshRoles(query.refreshRoles);
-  refreshEmployees(query.refreshEmployees);
-  refreshDepts(query.refreshDepts);
+// Delete employee
+function deleteEmployee() {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'id',
+      choices: employees,
+      message: 'Which employee record would you like to delete?',
+    },
+    {
+      type: 'confirm',
+      name: 'confirm_delete',
+      message: 'Are you sure you want to delete?'
+    }
+  ]).then((answers) => {
+    if (!answers.confirm_delete) {
+      ask();
+      return;
+    }
 
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'table',
-        choices: ['Employees', 'Roles', 'Departments'],
-        message: 'Which type of record would you like to delete?',
-      },
-      {
-        type: 'list',
-        name: 'id',
-        choices: employees,
-        when: (answers) => answers.table === 'Employees',
-        message: 'Which employee record would you like to delete?',
-      },
-      {
-        type: 'list',
-        name: 'id',
-        choices: roles,
-        when: (answers) => answers.table === 'Roles',
-        message: 'Which position record would you like to delete?',
-      },
-      {
-        type: 'list',
-        name: 'id',
-        choices: departments,
-        when: (answers) => answers.table === 'Departments',
-        message: 'Which department record would you like to delete?',
-      },
-      {
-        type: 'confirm',
-        name: 'confirm_delete',
-        message: 'Are you sure you want to delete?'
-      }
-    ])
-    .then((answers) => {
-      if (!answers.confirm_delete) {
-        ask();
-        return;
-      }
+    console.clear();
+    console.log('Deleting employee records...');
 
-      if (answers.table === 'Employees') {
-        console.log('Deleting employee records...');
-        updateRecords(query.deleteEmployee, query.viewEmployees, answers.id);
+    updateRecords(query.deleteEmployee, query.viewEmployees, answers.id);
+  });
+}
 
-      } else if (answers.table === 'Roles') {
-        console.log('Deleting position records...');
-        updateRecords(query.deleteRole, query.viewRoles, answers.id);
+// Delete role
+function deleteRole() {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'id',
+      choices: roles,
+      message: 'Which position would you like to delete?',
+    },
+    {
+      type: 'confirm',
+      name: 'confirm_delete',
+      message: 'Are you sure you want to delete?'
+    }
+  ]).then((answers) => {
+    if (!answers.confirm_delete) {
+      ask();
+      return;
+    }
 
-      } else if (answers.table === 'Departments') {
-        console.log('Deleting department records...');
-        updateRecords(query.deleteDept, query.viewDepts, answers.id)
+    console.clear();
+    console.log('Deleting position records...');
 
-      }
-    });
+    updateRecords(query.deleteRole, query.viewRoles, answers.id);
+  });
+}
+
+// Delete department
+function deleteDept() {
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'id',
+      choices: departments,
+      loop: false,
+      message: 'Which department would you like to delete?',
+    },
+    {
+      type: 'confirm',
+      name: 'confirm_delete',
+      message: 'Are you sure you want to delete?'
+    }
+  ]).then((answers) => {
+    if (!answers.confirm_delete) {
+      ask();
+      return;
+    }
+
+    console.clear();
+    console.log('Deleting department records...\n');
+
+    updateRecords(query.deleteDept, query.viewDepts, answers.id);
+  });
 }
 
 // // // // // // // // // // // //
@@ -363,6 +396,7 @@ async function updateRecords(queryString, reQueryString, data) {
 
   console.log(`Operation complete - ${results.affectedRows} rows affected.\n`);
 
+  refresh();
   viewRecords(reQueryString);
 }
 
@@ -380,7 +414,7 @@ async function refreshEmployees(queryString) {
     employees.push({ value: id, name: `${first_name} ${last_name}` });
   });
 
-  employees.push({ value: null, name: 'No Manager' });
+  employees.push({ value: null, name: 'None' });
 }
 
 // Refresh roles array to use as list choices in Inquirer prompt
@@ -401,8 +435,13 @@ async function refreshDepts(queryString) {
     const { id, name } = row;
     departments.push({ value: id, name: name });
   });
+}
 
-  departments.push({ value: null, name: 'No Department' });
+// Consolidate refresh function calls
+function refresh() {
+  refreshRoles(query.refreshRoles);
+  refreshEmployees(query.refreshEmployees);
+  refreshDepts(query.refreshDepts);
 }
 
 // // // // // // // //
