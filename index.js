@@ -21,6 +21,8 @@ const connection = mysql.createConnection({
   host: 'localhost',
   port: 3306,
   user: 'root',
+  // Note that password has temporarily been set to 'password' for 
+  // submitted assignments with public repositories
   password: 'password',
   database: 'employees_db',
 });
