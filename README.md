@@ -21,11 +21,11 @@ The Employee Tracking Interface is a command line application that offers busine
 
 
 ## Technologies
-**Core Technologies:**  
-Node.js, JavaScript, Inquirer.js, MySQL/SQL Server
-
-**Supplmentary Packages:**  
-console.table
+* Node.js
+* JavaScript
+* MySQL
+* Inquirer.js
+* console.table
 
 
 ## Installation
